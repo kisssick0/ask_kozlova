@@ -1,0 +1,33 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block content %}
+<div class="question-container">
+    <div class="question-element p-bold">
+        <h3>New Question</h3>
+        <form id="form" action="/">
+            <div class="input-check-error">
+                <p><label for="ftitle">Title</label><br></p>
+                <div class="error-message"></div>
+                <input class="input-control" type="text" id="ftitle" maxlength="120" placeholder="Enter your ask"><br>
+            </div>
+            <div class="input-check-error">
+                <p><label for="fask">Text</label><br></p>
+                <div class="error-message"></div>
+                <div class="create-ask">
+                    <div class="error-message"></div>
+                    <textarea id="fask" placeholder="Enter ask text">
+                    </textarea>
+                </div>
+            </div>
+            <div class="input-check-error">
+                <p><label for="ftags">Tags</label><br></p>
+                <div class="error-message"></div>
+                <input  class="input-control" type="text" id="ftags" maxlength="40"
+                    placeholder="Enter tags separated by commas"><br>
+            </div>
+            <input class="submit-ask" type="submit" value="Ask!">
+        </form>
+    </div>
+</div>
+<script defer src={% static "js/ask.js" %}></script>
+{% endblock %}

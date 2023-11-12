@@ -1,0 +1,114 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block content %}
+<div class="question-container">
+    <div class="question-element">
+        <div class="person">
+            <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
+            <div class="vote">
+                <button><img src="{% static "img/up.svg" %}" alt=""></button>
+                <p>5</p>
+                <button><img src="{% static "img/down.svg" %}" alt=""></button>
+            </div>
+        </div>
+        <div class="question-text">
+            <a href=""><h4>Whats up?</h4></a>
+            <p>Hey there! I hope you're doing well. As for me, I've been pretty busy lately working on
+                        optimizing our system's outgoing requests. We're looking into implementing a load balancer to
+                        manage and distribute these requests to external services and APIs. It's a crucial step in
+                        ensuring optimal performance and reliability for our system. We're currently in the process of
+                        analyzing and testing different implementation options for the load balancer to find the best
+                        fit for our needs. So far, everything is going according to plan, and I'm feeling confident
+                        that this improvement will make a significant impact on the efficiency of our system.
+                        How about you? How are things on your end?</p>
+            <a href="">
+                answer (3)
+            </a>
+            Tags:
+            <a href="">smth</a>
+            <a href="">Python</a>
+        </div>
+    </div>
+</div>
+
+<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
+
+<div class="answer-list">
+    <ul>
+        <li>
+            <div class="question-element answer">
+                <div class="person">
+                    <img src={% static "img/cat.jpg" %} alt="" class="avatar">
+                    <div class="vote">
+                        <button><img src="{% static "img/up.svg" %}" alt=""></button>
+                        <p>-10</p>
+                        <button><img src="{% static "img/down.svg" %}" alt=""></button>
+                    </div>
+                </div>
+                <div class="question-text">
+                    <a href=""><h4>Bad</h4></a>
+                    <p>Hey there! I hope you're doing well. As for me, I've been pretty busy lately working on
+                        optimizing our system's outgoing requests. We're looking into implementing a load balancer to
+                        manage and distribute these requests to external services and APIs. It's a crucial step in
+                        ensuring optimal performance and reliability for our system. We're currently in the process of
+                        analyzing and testing different implementation options for the load balancer to find the best
+                        fit for our needs. So far, everything is going according to plan, and I'm feeling confident
+                        that this improvement will make a significant impact on the efficiency of our system.
+                        How about you? How are things on your end?</p>
+                    <label class="check-container">Correct!
+                        <input type="checkbox">
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="question-element answer">
+                <div class="person">
+                    <img src={% static "img/cat.jpg" %} alt="" class="avatar">
+                    <div class="vote">
+                        <button><img src="{% static "img/up.svg" %}" alt=""></button>
+                        <p>-10</p>
+                        <button><img src="{% static "img/down.svg" %}" alt=""></button>
+                    </div>
+                </div>
+                <div class="question-text">
+                    <a href=""><h4>Bad</h4></a>
+                    <p>Hey there! I hope you're doing well. As for me, I've been pretty busy lately working on
+                        optimizing our system's outgoing requests. We're looking into implementing a load balancer to
+                        manage and distribute these requests to external services and APIs. It's a crucial step in
+                        ensuring optimal performance and reliability for our system. We're currently in the process of
+                        analyzing and testing different implementation options for the load balancer to find the best
+                        fit for our needs. So far, everything is going according to plan, and I'm feeling confident
+                        that this improvement will make a significant impact on the efficiency of our system.
+                        How about you? How are things on your end?</p>
+                    <label class="check-container">Correct!
+                        <input type="checkbox">
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+
+<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
+
+<div class="create-answer">
+    <textarea placeholder="Enter your answer">
+    </textarea>
+    <button>
+    Answer
+    </button>
+</div>
+
+<div class="pagination">
+    <a href=""><</a>
+    <a href="">1</a>
+    <a href="">2</a>
+    <a href="">3</a>
+    <a href="">></a>
+</div>
+{% endblock %}

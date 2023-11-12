@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block content %}
+<div class="question-container">
+    <div class="question-element p-bold">
+        <h3>Registration</h3>
+        <div class="user-login">
+            <form id="form" action="">
+                <div class="input-check-error">
+                    <p><label for="flogin">login</label><br></p>
+                    <div class="error-message"></div>
+                    <input class="input-control" type="text" id="flogin" maxlength="20" placeholder="Enter your login"><br>
+                </div>
+
+                <div class="input-check-error">
+                    <p><label for="femail">email</label><br></p>
+                    <div class="error-message"></div>
+                    <input class="input-control" type="text" id="femail" maxlength="30" placeholder="Enter your email"><br>
+                </div>
+
+                <div class="input-check-error">
+                    <p><label for="fnickname">nickname</label><br></p>
+                    <div class="error-message"></div>
+                    <input class="input-control" type="text" id="fnickname" maxlength="20" placeholder="Enter your nickname"><br>
+                </div>
+
+                <div class="input-check-error">
+                    <p><label for="fpassword">password</label><br></p>
+                    <div class="error-message"></div>
+                    <input  class="input-control" type="password" id="fpassword" maxlength="30"
+                        placeholder="Enter your password"><br>
+                </div>
+
+                <div class="input-check-error">
+                    <p><label for="frepeat-password">repeat password</label><br></p>
+                    <div class="error-message"></div>
+                    <input  class="input-control" type="password" id="frepeat-password" maxlength="30"
+                        placeholder="Repeat your password"><br>
+                </div>
+
+                <div class="mb-3">
+                    <p><label for="fupload">upload avatar</label><br></p>
+                    <input id="fupload" type="file" class="file-uploader" aria-label="Small file input example">
+                </div>
+
+                <input class="submit-ask center" type="submit" value="Register!">
+            </form>
+        </div>
+    </div>
+</div>
+<script defer src={% static "js/signup.js" %}></script>
+{% endblock %}

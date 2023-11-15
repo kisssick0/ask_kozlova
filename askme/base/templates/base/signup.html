@@ -1,7 +1,6 @@
-{% extends "base/base.html" %}
+{% extends "layouts/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="question-container">
     <div class="question-element p-bold">
         <h3>Registration</h3>
         <div class="user-login">
@@ -47,6 +46,5 @@
             </form>
         </div>
     </div>
-</div>
 <script defer src={% static "js/signup.js" %}></script>
 {% endblock %}

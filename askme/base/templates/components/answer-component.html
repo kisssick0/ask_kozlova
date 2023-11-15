@@ -1,0 +1,20 @@
+{% load static %}
+
+<div class="question-element answer">
+    <div class="person">
+        <img src={% static "img/cat.jpg" %} alt="" class="avatar">
+        <div class="vote">
+            <button><img src="{% static "img/up.svg" %}" alt=""></button>
+            -1000
+            <button><img src="{% static "img/down.svg" %}" alt=""></button>
+        </div>
+    </div>
+    <div class="question-text">
+        <a href=""><h4>{{ answer.title }}</h4></a>
+        <p>{{ answer.content }}</p>
+        <label class="check-container">Correct!
+            <input type="checkbox">
+            <span class="checkmark"></span>
+        </label>
+    </div>
+</div>

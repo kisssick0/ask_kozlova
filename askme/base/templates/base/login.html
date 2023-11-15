@@ -1,7 +1,6 @@
-{% extends "base/base.html" %}
+{% extends "layouts/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="question-container">
     <div class="question-element p-bold">
         <h3>Log In</h3>
         <div class="user-login">
@@ -22,6 +21,5 @@
             <a href=""><p>create new account</p></a>
         </div>
     </div>
-</div>
 <script defer src={% static "js/login.js" %}></script>
 {% endblock %}

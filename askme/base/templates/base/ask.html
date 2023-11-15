@@ -1,7 +1,6 @@
-{% extends "base/base.html" %}
+{% extends "layouts/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="question-container">
     <div class="question-element p-bold">
         <h3>New Question</h3>
         <form id="form" action="/">
@@ -28,6 +27,5 @@
             <input class="submit-ask" type="submit" value="Ask!">
         </form>
     </div>
-</div>
 <script defer src={% static "js/ask.js" %}></script>
 {% endblock %}

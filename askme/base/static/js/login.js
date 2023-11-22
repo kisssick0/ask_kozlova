@@ -37,7 +37,7 @@ const validateInputs = () => {
         setError(login, 'Login is required');
     } else if (loginValue.length < 4) {
         setError(login, 'Login must be at least 4 characters');
-    } else if (loginValue.length > 20) {
+    } else if (loginValue.length > 255) {
         setError(login, 'Login max length 20 characters');
     } else {
         setSuccess(login);

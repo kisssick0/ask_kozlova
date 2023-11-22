@@ -129,7 +129,8 @@ nav a img {
 .logged-in-container p {
     display: block;
     text-align: center;
-    margin-bottom: 2px;
+    margin-bottom: 0px;
+    font-size: 12px;
 }
 
 .logged-in-information {
@@ -140,6 +141,7 @@ nav a img {
 .logged-in-information a {
     text-decoration: none;
     color: #acd1ac;
+    margin-bottom: 3px;
 }
 
 .logged-in-information a:hover {
@@ -578,6 +580,15 @@ input:invalid {
 
 .tag-questions-h a h3 {
     color: black;
+}
+
+.hot {
+    color: black;
+    text-decoration: none;
+}
+
+.hot h4 {
+    font-weight: bold;
 }
 
 #main-page {

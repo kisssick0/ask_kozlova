@@ -5,17 +5,22 @@
         <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
         <div class="vote">
             <button><img src="{% static "img/up.svg" %}" alt=""></button>
-            5
+            {{ question.3 }}
             <button><img src="{% static "img/down.svg" %}" alt=""></button>
         </div>
     </div>
     <div class="question-text">
-        <a href="{% url 'question' question_id=question.id %}"><h4>{{ question.title }}</h4></a>
-        <p>{{ question.content }}</p>
-        <a href="{% url 'question' question_id=question.id %}">
-            answer({{ answer_qty }})
+        <a href="{% url 'question' question_id=question.0.pk %}"><h4>{{ question.0.title }}</h4></a>
+        <p>{{ question.0.content }}</p>
+        <a href="{% url 'question' question_id=question.0.pk %}">
+            answers({{ question.2 }})
         </a>
         Tags:
-        <a href="{% url 'tag' tag_name=question.tag %}">{{ question.tag }}</a>
+        {% for tag in question.1 %}
+            <a href="{% url 'tag' tag_name=tag %}">
+                {{ tag }}
+            </a>
+        {% endfor %}
+        <div style="float: right;">{{ question.0.date_add }}</div>
     </div>
 </div>

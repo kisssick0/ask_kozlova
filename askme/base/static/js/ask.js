@@ -42,8 +42,8 @@ const validateInputs = () => {
 
     if(titleValue === '') {
         setError(title, 'Title is required');
-    } else if (titleValue.length > 120) {
-        setError(title, 'Login max length 120 characters');
+    } else if (titleValue.length > 255) {
+        setError(title, 'Login max length 255 characters');
     } else {
         setSuccess(title);
     }

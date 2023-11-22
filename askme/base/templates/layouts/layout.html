@@ -28,6 +28,10 @@
                 </li>
             </ul>
 
+            <div class="logged-in-container">
+                <a href="{% url 'hot' %}" class="hot"><h4 class="name">HOT</h4></a>
+            </div>
+
             <div class="search-container">
                 <input placeholder="Search..." name="search" type="text">
                 <span role="button"><img src={% static "img/search.svg" %}></span>
@@ -53,6 +57,7 @@
                         <div class="logged-in-information">
                             <p>Dog</p>
                             <a href="{% url 'settings' %}"><p>settings</p></a>
+                            <a href=""><p>log out</p></a>
                         </div>
                     </div>
                 {% endif %}
@@ -69,21 +74,13 @@
             <div class="col-md-4 col-lg-3">
                 <div class="popular-tags">
                     <a href=""><h3>Popular Tags</h3></a>
-                    <a href="{% url 'tag' tag_name='Python' %}"><p>Python</p></a>
-                    <a href="{% url 'tag' tag_name='Cpp' %}"><p>Cpp</p></a>
-                    <a href="{% url 'tag' tag_name='Ruby' %}"><p>Ruby</p></a>
-                    <a href="{% url 'tag' tag_name='WASM' %}"><p>WASM</p></a>
-                    <a href="{% url 'tag' tag_name='HTML' %}"><p>HTML</p></a>
-                    <a href="{% url 'tag' tag_name='CSS' %}"><p>CSS</p></a>
-                    <a href="{% url 'tag' tag_name='Flask' %}"><p>Flask</p></a>
-                    <a href="{% url 'tag' tag_name='Docker' %}"><p>Docker</p></a>
-                <a href=""><h3>Best Members</h3></a>
-                <a href=""><p>Vasya</p></a>
-                <a href=""><p>Kisssick</p></a>
-                <a href=""><p>WhoWho</p></a>
-                <a href=""><p>Brain</p></a>
-                <a href=""><p>God</p></a>
-                <a href=""><p>BestProgger</p></a>
+                    {% for tag in popular_tags %}
+                        <a href="{% url 'tag' tag_name=tag.tag_name %}"><p>{{ tag.tag_name }}</p></a>
+                    {% endfor %}
+                    <a href=""><h3>Best Members</h3></a>
+                    {% for member in best_members %}
+                        <a href=""><p>{{ member }}</p></a>
+                    {% endfor %}
                 </div>
             </div>
         </div>

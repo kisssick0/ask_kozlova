@@ -5,16 +5,21 @@
         <img src={% static "img/cat.jpg" %} alt="" class="avatar">
         <div class="vote">
             <button><img src="{% static "img/up.svg" %}" alt=""></button>
-            -1000
+            {{ answer.1 }}
             <button><img src="{% static "img/down.svg" %}" alt=""></button>
         </div>
     </div>
     <div class="question-text">
-        <a href=""><h4>{{ answer.title }}</h4></a>
-        <p>{{ answer.content }}</p>
+        <a href=""><h4>{{ answer.0.title }}</h4></a>
+        <p>{{ answer.0.content }}</p>
         <label class="check-container">Correct!
+            {% if answer.0.status is True %}
+            <input type="checkbox" checked>
+            <span class="checkmark"></span>
+            {% else %}
             <input type="checkbox">
             <span class="checkmark"></span>
+            {% endif %}
         </label>
     </div>
 </div>

@@ -591,6 +591,10 @@ input:invalid {
     font-weight: bold;
 }
 
+.hot:hover {
+    color: #7bb67b;
+}
+
 #main-page {
     top: 10%;
     margin: auto;

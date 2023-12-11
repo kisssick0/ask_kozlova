@@ -7,6 +7,7 @@ from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
 
 QTY_ON_PAGE = 20
 
+
 def error(request):
     return render(request, 'base/error.html')
 
@@ -36,7 +37,6 @@ def index(request):
 
 
 def question(request, question_id: int):
-    Question.manager.sort_by_hot()   #
     item = Question.manager.question_by_id(question_id)
     answers = Answer.manager.answers_on_question(question_id)
     page_obj, page = paginate(request, answers)

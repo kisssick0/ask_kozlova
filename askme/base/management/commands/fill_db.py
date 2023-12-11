@@ -18,9 +18,6 @@ class Command(BaseCommand):
         parser.add_argument('ratio', type=int)
 
     def handle(self, *args, **kwargs):
-        for e in entities:
-            e.objects.all().delete()
-
         ratio = kwargs['ratio']
 
         users = [

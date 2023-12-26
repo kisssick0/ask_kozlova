@@ -1,73 +1,52 @@
 {% extends "layouts/layout.html" %}
 {% load static %}
 {% block content %}
+
     <div class="question-element p-bold">
-        <h3>Registration</h3>
+        <h3>Settings</h3>
         <div class="user-login">
             <form id="form" method="post">
                 {% csrf_token %}
                 <div class="input-check-error">
                     <div class="error-message">
-                        {{ form.errors.username }}
+                        {{ user_form.errors.username }}
                     </div>
                     <p>username</p>
                     <br>
-                    {{ form.username }}
+                    {{ user_form.username }}
                     <br>
                 </div>
 
                 <div class="input-check-error">
                     <div class="error-message">
-                        {{ form.errors.email }}
+                        {{ user_form.errors.email }}
                     </div>
                     <p>email</p>
                     <br>
-                    {{ form.email }}
+                    {{ user_form.email }}
                     <br>
                 </div>
 
                 <div class="input-check-error">
                     <div class="error-message">
-                        {{ form.errors.nickname }}
+                        {{ profile_form.errors.nickname }}
                     </div>
                     <p>nickname</p>
                     <br>
-                    {{ form.nickname }}
+                    {{ profile_form.nickname }}
                     <br>
-                </div>
-
-                <div class="input-check-error">
-                    <div class="error-message">
-                        {{ form.errors.password }}
-                    </div>
-                    <p>password</p>
-                    <br>
-                    {{ form.password }}
-                    <br>
-                </div>
-
-                <div class="input-check-error">
-                    <div class="error-message">
-                        {{ form.errors.password_check }}
-                    </div>
-                    <p>repeat password</p>
-                    <br>
-                    {{ form.password_check }}
-                    <br>
-                </div>
-
-                <div class="error-message">
-                    {{ form.non_field_errors }}
                 </div>
 
                 <div class="mb-3">
                     <p><label for="fupload">upload avatar</label><br></p>
+                    <div class="person">
+                        <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
+                    </div>
                     <input id="fupload" type="file" class="file-uploader" aria-label="Small file input example">
                 </div>
-
-                <input class="submit-ask center" type="submit" value="Register!">
+                <button class="submit-ask center" type="submit">Save</button>
             </form>
         </div>
     </div>
-<!--<script defer src={% static "js/signup.js" %}></script>-->
+<!--<script defer src={% static "js/settings.js" %}></script>-->
 {% endblock %}

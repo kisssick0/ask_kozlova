@@ -1,7 +1,15 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.contrib import auth
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import itertools
+
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
+
+from .forms import LoginForm, RegisterForm, EditUserForm, EditProfileForm, QuestionForm, AnswerForm
 from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
 
 
@@ -40,13 +48,28 @@ def question(request, question_id: int):
     item = Question.manager.question_by_id(question_id)
     answers = Answer.manager.answers_on_question(question_id)
     page_obj, page = paginate(request, answers)
+
+    if request.method == 'POST':
+        answer_form = AnswerForm(request.POST)
+        if answer_form.is_valid():
+            answer_form.instance.profile = request.user
+            answer_form.instance.question = Question.objects.get(pk=question_id)
+            answer = answer_form.save()
+            if answer:
+                return redirect('/question/' + str(question_id) + '/#' + str(answer))
+            else:
+                answer_form.add_error(None, 'Answer posting error')
+    else:
+        answer_form = AnswerForm()
+
     return render(request, 'base/question.html',
                   {'question': item,
                    'answers': page_obj,
                    'page_obj': page_obj,
                    'page': page,
                    'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'best_members': Profile.manager.best_members(),
+                   'form': answer_form
                    })
 
 
@@ -75,29 +98,92 @@ def hot(request):
                    })
 
 
-def login(request):
-    return render(request, 'base/login.html',
+@csrf_protect
+def log_in(request):
+    if request.method == 'POST':
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            user = authenticate(request, **login_form.cleaned_data)
+            if user:
+                login(request, user)
+                # print('Successfully logged in')
+                return redirect(request.GET.get('continue', '/'))
+            else:
+                login_form.add_error(None, 'Wrong password')
+    else:
+        login_form = LoginForm()
+    return render(request,
+                  'base/login.html',
                   {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'best_members': Profile.manager.best_members(),
+                   'form': login_form
                    })
 
 
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@csrf_protect
 def signup(request):
+    if request.method == 'POST':
+        user_form = RegisterForm(request.POST)
+        if user_form.is_valid():
+            user = user_form.save()
+            if user:
+                return redirect(reverse('index'))
+            else:
+                user_form.add_error(None, 'User saving error')
+    else:
+        user_form = RegisterForm()
     return render(request, 'base/signup.html',
                   {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'best_members': Profile.manager.best_members(),
+                   'form': user_form
                    })
 
 
+@login_required(login_url='login', redirect_field_name='continue')
+@csrf_protect
 def ask(request):
+    if request.method == 'POST':
+        question_form = QuestionForm(request.POST)
+        if question_form.is_valid():
+            question_form.instance.profile = request.user
+            question = question_form.save()
+            if question:
+                return redirect('/question/' + str(question))
+            else:
+                question_form.add_error(None, 'Question posting error')
+    else:
+        question_form = QuestionForm()
     return render(request, 'base/ask.html',
                   {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'best_members': Profile.manager.best_members(),
+                   'form': question_form
                    })
 
 
-def settings(request):
-    return render(request, 'base/settings.html',
+@csrf_protect
+@login_required(login_url='login', redirect_field_name='continue')
+def edit(request):
+    if request.method == 'POST':
+        user_form = EditUserForm(request.POST, instance=request.user)
+        profile_form = EditProfileForm(request.POST, instance=request.user.profile)
+        if user_form.is_valid():
+            user = user_form.save()
+            profile = profile_form.save()
+            if user and profile:
+                return redirect(reverse('edit'))
+            else:
+                user_form.add_error(None, 'User saving error')
+    else:
+        user_form = EditUserForm()
+        profile_form = EditProfileForm()
+    return render(request, 'base/edit.html',
                   {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'best_members': Profile.manager.best_members(),
+                   'user_form': user_form,
+                   'profile_form': profile_form
                    })

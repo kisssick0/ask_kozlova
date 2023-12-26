@@ -31,8 +31,7 @@ class Command(BaseCommand):
         profiles = [
             Profile(
                 user=user,
-                login=user.username,
-                nickname=fake.unique.user_name()
+                login=fake.unique.user_name()
             ) for user in users
         ]
         Profile.objects.bulk_create(profiles)

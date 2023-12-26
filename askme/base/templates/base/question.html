@@ -15,11 +15,19 @@
 <hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
 
 <div class="create-answer">
-    <textarea placeholder="Enter your answer">
-    </textarea>
-    <button>
-    Answer
-    </button>
+    <form id="form" method="post">
+        {% csrf_token %}
+        <div class="input-check-error">
+            <div class="error-message">
+                {{ form.errors.content }}
+            </div>
+            <p>Answer</p>
+            <br>
+            {{ form.content }}
+            <br>
+        </div>
+        <input class="submit-ask" type="submit" value="Answer!">
+    </form>
 </div>
 
 

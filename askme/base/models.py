@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Prefetch, Sum, Max
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-# commen
 
 class QuestionManager(models.Manager):
     def sort_by_latest(self, count=100):
@@ -16,9 +15,15 @@ class QuestionManager(models.Manager):
         items = []
         for question in questions:
             question_id = question.pk
-            likes_count = likes.get(question=question_id)['sum_likes']
+            try:
+                likes_count = likes.get(question=question_id)['sum_likes']
+            except:
+                likes_count = 0
             question_tags = tags.filter(pk__in=question_tag_ids.filter(question=question_id).values('tag_id'))
-            answer_count = answer_counts.get(question=question_id)
+            try:
+                answer_count = answer_counts.get(question=question_id)
+            except:
+                answer_count = {'count_answers': 0}
             items.append([question]
                          + [question_tags]
                          + [answer_count['count_answers']]
@@ -30,7 +35,10 @@ class QuestionManager(models.Manager):
         question = Question.objects.get(pk=question_id)
         question_tag_ids = QuestionTag.objects.filter(question=question_id)
         tags = [Tag.objects.get(pk=qt.tag_id) for qt in question_tag_ids]
-        likes = LikeQuestion.manager.likes_on_question_value([question.pk]).get(question=question_id)['sum_likes']
+        try:
+            likes = LikeQuestion.manager.likes_on_question_value([question.pk]).get(question=question_id)['sum_likes']
+        except:
+            likes = 0
         items = [question] + [tags] + [Answer.manager.count_answers_on_question(question.pk)] + [likes]
         return items
 
@@ -42,11 +50,14 @@ class QuestionManager(models.Manager):
         for question in questions:
             question_tag_ids = QuestionTag.objects.filter(question=question.pk)
             tags = [Tag.objects.get(pk=qt.tag_id) for qt in question_tag_ids]
-            likes = LikeQuestion.manager.likes_on_question_value([question.pk])
+            try:
+                likes = LikeQuestion.manager.likes_on_question_value([question.pk])[0]['sum_likes']
+            except:
+                likes = 0
             items.append([question]
                          + [tags]
-                         + [Answer.manager.count_answers_on_questions(question.pk)]
-                         + [likes[question.pk]]
+                         + [Answer.manager.count_answers_on_question(question.pk)]
+                         + [likes]
                          )
         return items
 
@@ -98,8 +109,8 @@ class ProfileManager(models.Manager):
         # больше всего правильных ответов
         queryset = Answer.objects.filter(status=True).values('user').annotate(count=Count('status')).order_by('-count')[:10]
         user_ids = [qs['user'] for qs in queryset]
-        best_members = Profile.objects.filter(pk__in=user_ids)
-        nicknames = [member.nickname for member in best_members]
+        best_members = Profile.objects.filter(pk__in=user_ids).values('user_id')
+        nicknames = User.objects.filter(pk__in=best_members)
         return nicknames
 
 
@@ -139,11 +150,10 @@ class Question(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=255)
-    login = models.CharField(max_length=255)
     # avatar = models.ImageField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.nickname}"
+        return f"{User.username}"
 
     objects = models.Manager()
     manager = ProfileManager()

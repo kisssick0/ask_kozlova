@@ -1,25 +1,37 @@
 {% extends "layouts/layout.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 {% block content %}
     <div class="question-element p-bold">
         <h3>Log In</h3>
         <div class="user-login">
-            <form id="form" action="/">
+            <form id="form" method="post">
+                {% csrf_token %}
                 <div class="input-check-error">
-                    <p><label for="flogin">login</label><br></p>
-                    <div class="error-message"></div>
-                    <input class="input-control" type="text" id="flogin" maxlength="20" placeholder="Enter your login"><br>
+                    <div class="error-message">
+                        {{ form.errors.username }}
+                    </div>
+                    <p>username</p>
+                    <br>
+                    {{ form.username }}
+                    <br>
                 </div>
                 <div class="input-check-error">
-                    <p><label for="fpassword">password</label><br></p>
-                    <div class="error-message"></div>
-                    <input  class="input-control" type="password" id="fpassword" maxlength="30"
-                        placeholder="Enter your password"><br>
+                    <p>password</p>
+                    <div class="error-message">
+                        {{ form.errors.password }}
+                    </div>
+                    {{ form.password }}
+                    <br>
                 </div>
+                <div class="error-message">
+                    {{ form.non_field_errors }}
+                </div>
+
                 <button class="submit-ask center" type="submit">Log in!</button>
             </form>
             <a href=""><p>create new account</p></a>
         </div>
     </div>
-<script defer src={% static "js/login.js" %}></script>
+<!--<script defer src={% static "js/login.js" %}></script>-->
 {% endblock %}

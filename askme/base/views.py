@@ -262,6 +262,7 @@ def dislike_answer(request):
 @csrf_protect
 @login_required
 def correct(request):
+    # cgfxd
     answer_id = request.POST.get('answer_id')
     question_id = request.POST.get('question_id')
     answer = get_object_or_404(Answer, pk=answer_id)

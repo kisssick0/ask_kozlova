@@ -5,7 +5,7 @@
 {% include 'components/question-component.html' %}
 
 <hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
-
+{% csrf_token %}
 {% for answer in answers %}
     {% include 'components/answer-component.html' %}
 {% endfor %}
@@ -29,6 +29,4 @@
         <input class="submit-ask" type="submit" value="Answer!">
     </form>
 </div>
-
-
 {% endblock %}

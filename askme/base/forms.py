@@ -101,7 +101,9 @@ class EditUserForm(forms.ModelForm):
 
     def clean(self):
         username = self.cleaned_data.get('username')
-        if User.objects.filter(username__exact=username).exists():
+        if username == self.instance.username:
+            pass
+        elif User.objects.filter(username__exact=username).exists():
             raise ValidationError({'username': 'Username is already taken'})
 
         valid = re.compile(r"^[a-zA-Z0-9_]+$")
@@ -115,10 +117,11 @@ class EditProfileForm(forms.ModelForm):
                                widget=forms.TextInput(attrs={"class": "input-control"}),
                                required=True
                                )
+    avatar = forms.ImageField(required=False, widget=forms.FileInput)
 
     class Meta:
         model = Profile
-        fields = ['nickname']
+        fields = ['nickname', 'avatar']
 
     def clean(self):
         valid = re.compile(r"^[a-zA-Z0-9_]+$")

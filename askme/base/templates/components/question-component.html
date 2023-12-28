@@ -2,11 +2,15 @@
 
 <div class="question-element question-list">
     <div class="person">
-        <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
-        <div class="vote">
-            <button><img src="{% static "img/up.svg" %}" alt=""></button>
-            {{ question.3 }}
-            <button><img src="{% static "img/down.svg" %}" alt=""></button>
+        {% if question.0.user.avatar.url %}
+            <img src="{{ question.0.user.avatar.url }}" alt="Profile Avatar" class="avatar"/>
+        {% else %}
+            <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
+        {% endif %}
+        <div class="vote like-section">
+            <button data-id="{{ question.0.pk }}"><img src="{% static "img/up.svg" %}" alt=""></button>
+            <span>{{ question.3 }}</span>
+            <button data-id="{{ question.0.pk }}"><img src="{% static "img/down.svg" %}" alt=""></button>
         </div>
     </div>
     <div class="question-text">

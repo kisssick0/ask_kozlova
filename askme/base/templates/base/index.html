@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="question-list">
+    {% csrf_token %}
         {% for question in questions %}
             {% include 'components/question-component.html' %}
         {% endfor %}

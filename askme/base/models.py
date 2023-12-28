@@ -74,6 +74,11 @@ class QuestionManager(models.Manager):
                 [questions[i]] + [[tags[i]]] + [Answer.manager.count_answers_on_question(question_ids[i])] + [likes[i]])
         return items
 
+    def likes_count(self, question_id):
+        likes = LikeQuestion.objects.filter(question=question_id)
+        items = likes.values('question').annotate(sum_likes=Sum('like'))
+        return items
+
 
 class AnswerManager(models.Manager):
     def answers_on_question(self, question_id: int):
@@ -95,6 +100,28 @@ class AnswerManager(models.Manager):
 
     def count_answers_on_questions(self, question_ids: list):
         return Answer.objects.filter(question__in=question_ids).values('question').annotate(count_answers=Count('question'))
+
+    def likes_count(self, answer_id):
+        likes = LikeAnswer.objects.filter(answer=answer_id)
+        items = likes.values('answer').annotate(sum_likes=Sum('like'))
+        return items
+
+    def toggle_correct(self, question, answer, user):
+        if question.user == user and answer.status is False:
+            pk = Answer.objects.get(user=answer.user, question=answer.question, content=answer.content,
+                                    status=False).pk
+            Answer.objects.filter(user=answer.user, question=answer.question, content=answer.content,
+                                  status=False).delete()
+            Answer.objects.create(pk=pk, user=answer.user, question=answer.question, content=answer.content, status=True)
+            return True
+        if question.user == user and answer.status is True:
+            pk = Answer.objects.get(user=answer.user, question=answer.question, content=answer.content,
+                                    status=True).pk
+            Answer.objects.filter(user=answer.user, question=answer.question, content=answer.content,
+                                  status=True).delete()
+            Answer.objects.create(pk=pk, user=answer.user, question=answer.question, content=answer.content, status=False)
+            return False
+        return None
 
 
 class TagManager(models.Manager):
@@ -124,11 +151,57 @@ class LikeQuestionManager(models.Manager):
         items = LikeQuestion.objects.values('question').annotate(sumlikes=Sum('like')).order_by('-sumlikes')[:count]
         return items
 
+    def toggle_like(self, user, question, like_value=0):
+        if question.user != user:
+            if like_value == 1:
+                # нажал на лайк, но уже стоит лайк -> удаляем лайк
+                if LikeQuestion.objects.filter(user=user, question=question, like=like_value).exists():
+                    LikeQuestion.objects.filter(user=user, question=question, like=like_value).delete()
+                else:
+                    # нажал на лайк, но уже стоит дизлайк -> удаляем дизлайк
+                    if LikeQuestion.objects.filter(user=user, question=question, like=-1).exists():
+                        LikeQuestion.objects.filter(user=user, question=question, like=-1).delete()
+                    # ставим лайк
+                    LikeQuestion.objects.create(user=user, question=question, like=like_value)
+            elif like_value == -1:
+                # нажал на дизлайк, но уже стоит дизлайк -> удаляем дизлайк
+                if LikeQuestion.objects.filter(user=user, question=question, like=like_value).exists():
+                    LikeQuestion.objects.filter(user=user, question=question, like=like_value).delete()
+                else:
+                    # нажал на дизлайк, но уже стоит лайк -> удаляем лайк
+                    if LikeQuestion.objects.filter(user=user, question=question, like=1).exists():
+                        LikeQuestion.objects.filter(user=user, question=question, like=1).delete()
+                    # ставим дизлайк
+                    LikeQuestion.objects.create(user=user, question=question, like=like_value)
+
 
 class LikeAnswerManager(models.Manager):
     def likes_on_answer_value(self, answer_ids: list):
         likes = LikeAnswer.objects.filter(answer__in=answer_ids).values('answer').annotate(sum_likes=Sum('like'))
         return likes
+
+    def toggle_like(self, user, answer, like_value=0):
+        if answer.user != user:
+            if like_value == 1:
+                # нажал на лайк, но уже стоит лайк -> удаляем лайк
+                if LikeAnswer.objects.filter(user=user, answer=answer, like=like_value).exists():
+                    LikeAnswer.objects.filter(user=user, answer=answer, like=like_value).delete()
+                else:
+                    # нажал на лайк, но уже стоит дизлайк -> удаляем дизлайк
+                    if LikeAnswer.objects.filter(user=user, answer=answer, like=-1).exists():
+                        LikeAnswer.objects.filter(user=user, answer=answer, like=-1).delete()
+                    # ставим лайк
+                    LikeAnswer.objects.create(user=user, answer=answer, like=like_value)
+            elif like_value == -1:
+                # нажал на дизлайк, но уже стоит дизлайк -> удаляем дизлайк
+                if LikeAnswer.objects.filter(user=user, answer=answer, like=like_value).exists():
+                    LikeAnswer.objects.filter(user=user, answer=answer, like=like_value).delete()
+                else:
+                    # нажал на дизлайк, но уже стоит лайк -> удаляем лайк
+                    if LikeAnswer.objects.filter(user=user, answer=answer, like=1).exists():
+                        LikeAnswer.objects.filter(user=user, answer=answer, like=1).delete()
+                    # ставим дизлайк
+                    LikeAnswer.objects.create(user=user, answer=answer, like=like_value)
 
 
 class Question(models.Model):
@@ -150,7 +223,9 @@ class Question(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=255)
-    # avatar = models.ImageField(null=True, blank=True)
+    avatar = models.ImageField(
+        null=True, blank=True, default='avatar.jpg', upload_to="avatar/%Y/%m/%d"
+    )
 
     def __str__(self):
         return f"{User.username}"

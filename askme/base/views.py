@@ -1,9 +1,13 @@
+import time
+
 from django.contrib import auth
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.forms.models import model_to_dict
+
 import itertools
 
 from django.urls import reverse
@@ -44,6 +48,7 @@ def index(request):
                    })
 
 
+@csrf_protect
 def question(request, question_id: int):
     item = Question.manager.question_by_id(question_id)
     answers = Answer.manager.answers_on_question(question_id)
@@ -168,22 +173,98 @@ def ask(request):
 @csrf_protect
 @login_required(login_url='login', redirect_field_name='continue')
 def edit(request):
-    if request.method == 'POST':
+    user_form = EditUserForm()
+    profile_form = EditProfileForm()
+
+    if request.method == 'GET':
+        user_form = EditUserForm(instance=request.user)
+        profile_form = EditProfileForm(instance=request.user.profile)
+
+    elif request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=request.user)
-        profile_form = EditProfileForm(request.POST, instance=request.user.profile)
-        if user_form.is_valid():
+        profile_form = EditProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
             profile = profile_form.save()
             if user and profile:
                 return redirect(reverse('edit'))
             else:
                 user_form.add_error(None, 'User saving error')
-    else:
-        user_form = EditUserForm()
-        profile_form = EditProfileForm()
+
     return render(request, 'base/edit.html',
                   {'popular_tags': Tag.manager.popular_tags(),
                    'best_members': Profile.manager.best_members(),
                    'user_form': user_form,
                    'profile_form': profile_form
                    })
+
+
+@csrf_protect
+@login_required
+def like(request):
+    question_id = request.POST.get('question_id')
+    question = get_object_or_404(Question, pk=question_id)
+    LikeQuestion.manager.toggle_like(user=request.user.profile, question=question, like_value=1)
+    try:
+         count = Question.manager.likes_count(question_id)[0]['sum_likes']
+    except:
+         count = 0
+    return JsonResponse({
+        'count': count
+    })
+
+
+@csrf_protect
+@login_required
+def dislike(request):
+    question_id = request.POST.get('question_id')
+    question = get_object_or_404(Question, pk=question_id)
+    LikeQuestion.manager.toggle_like(user=request.user.profile, question=question, like_value=-1)
+    try:
+         count = Question.manager.likes_count(question_id)[0]['sum_likes']
+    except:
+         count = 0
+    return JsonResponse({
+        'count': count
+    })
+
+
+@csrf_protect
+@login_required
+def like_answer(request):
+    answer_id = request.POST.get('answer_id')
+    answer = get_object_or_404(Answer, pk=answer_id)
+    LikeAnswer.manager.toggle_like(user=request.user.profile, answer=answer, like_value=1)
+    try:
+         count = Answer.manager.likes_count(answer_id)[0]['sum_likes']
+    except:
+         count = 0
+    return JsonResponse({
+        'count': count
+    })
+
+
+@csrf_protect
+@login_required
+def dislike_answer(request):
+    answer_id = request.POST.get('answer_id')
+    answer = get_object_or_404(Answer, pk=answer_id)
+    LikeAnswer.manager.toggle_like(user=request.user.profile, answer=answer, like_value=-1)
+    try:
+         count = Answer.manager.likes_count(answer_id)[0]['sum_likes']
+    except:
+         count = 0
+    return JsonResponse({
+        'count': count
+    })
+
+
+@csrf_protect
+@login_required
+def correct(request):
+    answer_id = request.POST.get('answer_id')
+    question_id = request.POST.get('question_id')
+    answer = get_object_or_404(Answer, pk=answer_id)
+    question = get_object_or_404(Question, pk=question_id)
+    Answer.manager.toggle_correct(user=request.user.profile, question=question, answer=answer)
+    return JsonResponse({})

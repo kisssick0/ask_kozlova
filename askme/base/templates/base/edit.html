@@ -5,7 +5,7 @@
     <div class="question-element p-bold">
         <h3>Settings</h3>
         <div class="user-login">
-            <form id="form" method="post">
+            <form id="form" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="input-check-error">
                     <div class="error-message">
@@ -38,12 +38,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <p><label for="fupload">upload avatar</label><br></p>
-                    <div class="person">
-                        <img src={% static "img/avatar.jpg" %} alt="" class="avatar">
+                    <p>upload avatar</p>
+                    <div class="error-message">
+                        {{ profile_form.errors.avatar }}
                     </div>
-                    <input id="fupload" type="file" class="file-uploader" aria-label="Small file input example">
+                    <div class="person">
+                        {% if request.user.profile.avatar.url %}
+                            <img src="{{ request.user.profile.avatar.url }}" alt="Profile Avatar" class="avatar"/>
+                        {% endif %}
+                    </div>
+                    <br>
+                    {{ profile_form.avatar }}
+                    <br>
                 </div>
+
                 <button class="submit-ask center" type="submit">Save</button>
             </form>
         </div>

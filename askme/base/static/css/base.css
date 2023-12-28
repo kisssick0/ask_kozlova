@@ -248,8 +248,8 @@ nav a img {
 }
 
 .person {
+    display: block;
     float: left;
-    display: inline;
     margin-right: 30px;
     text-align: center;
     align-items: center;
@@ -257,6 +257,7 @@ nav a img {
 }
 
 .avatar {
+    display: block;
     border: 2px solid black;
     border-radius: 10px;
     width: 80px;
@@ -360,6 +361,7 @@ min-height: 150px;
 }
 
 .check-container {
+    width: 150px;
     display: block;
     position: relative;
     padding-left: 35px;
@@ -374,7 +376,6 @@ min-height: 150px;
 
 .check-container input {
   position: absolute;
-  opacity: 0;
   cursor: pointer;
   height: 0;
   width: 0;
@@ -392,40 +393,6 @@ min-height: 150px;
     border-radius: 5px;
 }
 
-/* On mouse-over, add a grey background color */
-.check-container:hover input ~ .checkmark {
-  background-color: #ccc;
-}
-
-/* When the checkbox is checked, add a blue background */
-.check-container input:checked ~ .checkmark {
-  background-color: #7b99b6;
-}
-
-/* Create the checkmark/indicator (hidden when not checked) */
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-}
-
-/* Show the checkmark when checked */
-.check-container input:checked ~ .checkmark:after {
-  display: block;
-}
-
-/* Style the checkmark/indicator */
-.check-container .checkmark:after {
-  left: 9px;
-  top: 5px;
-  width: 5px;
-  height: 10px;
-  border: solid black;
-  border-width: 0 3px 3px 0;
-  -webkit-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
 
 .create-answer {
     background-color: white;

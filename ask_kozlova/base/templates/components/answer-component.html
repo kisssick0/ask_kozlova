@@ -18,12 +18,12 @@
         <p>{{ answer.0.content }}</p>
         <div class="correct-section">
             {% if answer.0.status is True %}
-                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="correct"  checked>
+                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="correct" class="mycheckbox-checked" checked>
                 <label for="correct">
                     Correct!
                 </label>
             {% else %}
-                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="incorrect">
+                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="incorrect" class="mycheckbox">
                 <label for="incorrect">
                     Correct!
                 </label>

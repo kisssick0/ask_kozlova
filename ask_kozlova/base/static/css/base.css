@@ -609,6 +609,27 @@ input:invalid {
     color: #7bb67b;
 }
 
+.mycheckbox {
+    border: 2px solid black;
+    border-radius: 25px;
+    width: 20px;
+    height: 20px;
+}
+
+.mycheckbox-checked {
+    border: 2px solid black;
+    border-radius: 25px;
+    width: 20px;
+    height: 20px;
+    background-color: #7b99b6;
+}
+
+.correct-section {
+    display: block;
+    vertical-align: center;
+    justify-content: center;
+}
+
 #main-page {
     top: 10%;
     margin: auto;

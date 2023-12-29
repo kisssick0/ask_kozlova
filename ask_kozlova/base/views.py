@@ -7,8 +7,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
+from django.conf import settings as conf_settings
 
 import itertools
+import jwt
+import time
 
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
@@ -18,6 +21,18 @@ from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
 
 
 QTY_ON_PAGE = 20
+
+
+def get_centrifugo_data(user_id: str) -> dict:
+    return {
+        'centrifugo': {
+            'token': jwt.encode({"sub": str(user_id),
+                                 "exp": int(time.time()) + 5 * 60},
+                                conf_settings.CENTRIFUGO_TOKEN_HMAC_SECRET_KEY,
+                                algorithm="HS256"),
+            'ws_url': conf_settings.CENTRIFUGO_WS_URL
+        }
+    }
 
 
 def error(request):
@@ -74,7 +89,8 @@ def question(request, question_id: int):
                    'page': page,
                    'popular_tags': Tag.manager.popular_tags(),
                    'best_members': Profile.manager.best_members(),
-                   'form': answer_form
+                   'form': answer_form,
+                   **get_centrifugo_data(request.user.id)
                    })
 
 

@@ -1,0 +1,43 @@
+upstream ask_kozlova {
+    server 127.0.0.1:8081;
+}
+
+server {
+    listen 80 default_server;
+    server_name ask_kozlova.com;
+
+    error_log usr/local/var/log/nginx/ask_kozlova_error.log;
+    access_log usr/local/var/log/nginx/ask_kozlova_access.log;
+
+    location /base/static/ {
+	gzip on;
+	gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+	gzip_min_length 1000;
+        root /Users/alinakozlova/Desktop/courses/web-tech/AskMe/ask_kozlova/;
+    	expires 7d;
+        add_header Cache-Control "public";
+
+    }
+
+    location ^~/base/uploads/ {
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+        gzip_min_length 1000;
+    	root /Users/alinakozlova/Desktop/courses/web-tech/AskMe/ask_kozlova/;
+   	expires 1d;
+	add_header Cache-Control "public";
+    }
+
+    location ~* \.html$ {
+        root /Users/alinakozlova/Desktop/courses/web-tech/AskMe/ask_kozlova/base/static/;
+    }
+
+
+    location / {
+        proxy_pass http://ask_kozlova;
+        proxy_set_header Host $host;
+    	proxy_cache mycache;
+	proxy_cache_valid 200 302 10m;
+	proxy_cache_valid 404 1m;
+    }
+}

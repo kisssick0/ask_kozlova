@@ -1,0 +1,301 @@
+Насколько быстрее отдается статика по сравнению с WSGI?
+nginx
+Requests per second:    6578.71 [#/sec] (mean)
+Time per request:       1.520 [ms] (mean)
+Time per request:       0.152 [ms] (mean, across all concurrent requests)
+
+gunicorn
+Requests per second:    880.97 [#/sec] (mean)
+Time per request:       11.351 [ms] (mean)
+Time per request:       1.135 [ms] (mean, across all concurrent requests)
+
+Примерно в 7.5 раз
+
+
+Во сколько раз ускоряет работу proxy_cache?
+В моем случае не ускорил, видимо, неправильно настроен.
+
+
+
+1. ОТДАЧА СТАТИЧЕСКОГО ДОКУМЕНТА НАПРЯМУЮ ЧЕРЕЗ NGINX
+
+MBP-Alina:AskMe alinakozlova$ ab -n 2000 -c 10 http://127.0.0.1/sample.html
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 200 requests
+Completed 400 requests
+Completed 600 requests
+Completed 800 requests
+Completed 1000 requests
+Completed 1200 requests
+Completed 1400 requests
+Completed 1600 requests
+Completed 1800 requests
+Completed 2000 requests
+Finished 2000 requests
+
+
+Server Software:        nginx/1.25.3
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /sample.html
+Document Length:        148 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.304 seconds
+Complete requests:      2000
+Failed requests:        0
+Total transferred:      760000 bytes
+HTML transferred:       296000 bytes
+Requests per second:    6578.71 [#/sec] (mean)
+Time per request:       1.520 [ms] (mean)
+Time per request:       0.152 [ms] (mean, across all concurrent requests)
+Transfer rate:          2441.32 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.5      0       9
+Processing:     0    1   3.4      1      43
+Waiting:        0    1   3.2      1      43
+Total:          1    1   3.5      1      43
+
+Percentage of the requests served within a certain time (ms)
+  50%      1
+  66%      1
+  75%      1
+  80%      1
+  90%      2
+  95%      3
+  98%      7
+  99%     18
+ 100%     43 (longest request)
+
+
+
+
+
+
+2. ОТДАЧА СТАТИЧЕСКОГО ДОКУМЕНТА НАПРЯМУЮ ЧЕРЕЗ JUNICORN
+
+MBP-Alina:AskMe alinakozlova$ ab -n 2000 -c 10 http://127.0.0.1:8081/sample.html
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 200 requests
+Completed 400 requests
+Completed 600 requests
+Completed 800 requests
+Completed 1000 requests
+Completed 1200 requests
+Completed 1400 requests
+Completed 1600 requests
+Completed 1800 requests
+Completed 2000 requests
+Finished 2000 requests
+
+
+Server Software:        gunicorn
+Server Hostname:        127.0.0.1
+Server Port:            8081
+
+Document Path:          /sample.html
+Document Length:        5109 bytes
+
+Concurrency Level:      10
+Time taken for tests:   2.270 seconds
+Complete requests:      2000
+Failed requests:        0
+Non-2xx responses:      2000
+Total transferred:      10766000 bytes
+HTML transferred:       10218000 bytes
+Requests per second:    880.97 [#/sec] (mean)
+Time per request:       11.351 [ms] (mean)
+Time per request:       1.135 [ms] (mean, across all concurrent requests)
+Transfer rate:          4631.12 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.2      0       5
+Processing:     6   11   6.5      8     104
+Waiting:        6   10   5.9      8     104
+Total:          6   11   6.5      8     105
+
+Percentage of the requests served within a certain time (ms)
+  50%      8
+  66%     10
+  75%     11
+  80%     13
+  90%     18
+  95%     24
+  98%     32
+  99%     38
+ 100%    105 (longest request)
+
+
+
+
+
+
+
+3. ОТДАЧА ДИНАМИЧЕСКОГО ДОКУМЕНТА НАПРЯМУЮ ЧЕРЕЗ JUNICORN
+
+MBP-Alina:AskMe alinakozlova$ ab -l -c 10 -n 200 http://127.0.0.1:8081/login/
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 100 requests
+Completed 200 requests
+Finished 200 requests
+
+
+Server Software:        gunicorn
+Server Hostname:        127.0.0.1
+Server Port:            8081
+
+Document Path:          /login/
+Document Length:        Variable
+
+Concurrency Level:      10
+Time taken for tests:   20.877 seconds
+Complete requests:      200
+Failed requests:        0
+Total transferred:      1195000 bytes
+HTML transferred:       1102400 bytes
+Requests per second:    9.58 [#/sec] (mean)
+Time per request:       1043.864 [ms] (mean)
+Time per request:       104.386 [ms] (mean, across all concurrent requests)
+Transfer rate:          55.90 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       1
+Processing:   318  979 511.9    739    2653
+Waiting:      318  978 511.8    739    2653
+Total:        318  979 511.9    739    2654
+
+Percentage of the requests served within a certain time (ms)
+  50%    739
+  66%   1383
+  75%   1486
+  80%   1493
+  90%   1590
+  95%   1874
+  98%   2238
+  99%   2403
+ 100%   2654 (longest request)
+
+
+
+
+
+4. ОТДАЧА ДИНАМИЧЕСКОГО ДОКУМЕНТА ЧЕРЕЗ ПРОКСИРОВАНИЕ ЗАПРОСА С NGINX НА UNICORN
+
+MBP-Alina:AskMe alinakozlova$ ab -l -c 10 -n 200 http://127.0.0.1/login/
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 100 requests
+Completed 200 requests
+Finished 200 requests
+
+
+Server Software:        nginx/1.25.3
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /login/
+Document Length:        Variable
+
+Concurrency Level:      10
+Time taken for tests:   18.560 seconds
+Complete requests:      200
+Failed requests:        0
+Total transferred:      1195800 bytes
+HTML transferred:       1102400 bytes
+Requests per second:    10.78 [#/sec] (mean)
+Time per request:       928.002 [ms] (mean)
+Time per request:       92.800 [ms] (mean, across all concurrent requests)
+Transfer rate:          62.92 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       1
+Processing:   358  893 437.7    654    1663
+Waiting:      358  893 437.8    654    1663
+Total:        358  893 437.7    654    1663
+
+Percentage of the requests served within a certain time (ms)
+  50%    654
+  66%    863
+  75%   1458
+  80%   1489
+  90%   1535
+  95%   1565
+  98%   1597
+  99%   1648
+ 100%   1663 (longest request)
+
+
+
+
+
+
+
+5. ОТДАЧА ДИНАМИЧЕСКОГО ДОКУМЕНТА ЧЕРЕЗ ПРОКСИРОВАНИЕ ЗАПРОСА С NGINX НА UNICORN, при кэшировнии ответа на nginx (proxy cache).
+
+MBP-Alina:AskMe alinakozlova$ ab -l -c 10 -n 200 http://127.0.0.1/login/
+This is ApacheBench, Version 2.3 <$Revision: 1879490 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 100 requests
+Completed 200 requests
+Finished 200 requests
+
+
+Server Software:        nginx/1.25.3
+Server Hostname:        127.0.0.1
+Server Port:            80
+
+Document Path:          /login/
+Document Length:        Variable
+
+Concurrency Level:      10
+Time taken for tests:   20.100 seconds
+Complete requests:      200
+Failed requests:        0
+Total transferred:      1195800 bytes
+HTML transferred:       1102400 bytes
+Requests per second:    9.95 [#/sec] (mean)
+Time per request:       1005.000 [ms] (mean)
+Time per request:       100.500 [ms] (mean, across all concurrent requests)
+Transfer rate:          58.10 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       1
+Processing:   253  983 493.4    754    1998
+Waiting:      252  983 493.4    754    1998
+Total:        254  983 493.4    755    1998
+
+Percentage of the requests served within a certain time (ms)
+  50%    755
+  66%   1088
+  75%   1578
+  80%   1617
+  90%   1703
+  95%   1763
+  98%   1848
+  99%   1968
+ 100%   1998 (longest request)

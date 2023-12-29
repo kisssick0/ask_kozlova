@@ -32,8 +32,8 @@ def simple_app(environ, start_response):
         return [result]
     if environ["REQUEST_METHOD"] == 'GET':
         get_data = environ["QUERY_STRING"]
-        result = json.dumps(get_data).encode('utf-8') + b'\n'
-        print(result)
+        get_data = '{"' + str(get_data).replace("=", '": "').replace("&", '", "') + '"}'
+        result = get_data.encode('utf-8') + b'\n'
         response_headers = [('Content-type', 'text/plain')]
         start_response(status, response_headers)
         return [result]

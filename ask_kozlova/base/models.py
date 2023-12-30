@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Prefetch, Sum, Max
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from datetime import date, timedelta
+
 
 class QuestionManager(models.Manager):
     def sort_by_latest(self, count=100):
@@ -126,19 +128,39 @@ class AnswerManager(models.Manager):
 
 class TagManager(models.Manager):
     def popular_tags(self):
-        queryset = QuestionTag.objects.values('tag').annotate(count_q=Count('question')).order_by('-count_q')[:10]
-        tags = Tag.objects.filter(pk__in=[el['tag'] for el in queryset])
+        # 10 тегов с самым большим количеством вопросов за последние 3 месяца
+        start_date = date.today()
+        end_date = start_date + timedelta(days=90)
+        tags = Question.objects.filter(date_add__range=[start_date, end_date])
+        tags = tags.values('pk')
+        tags = QuestionTag.objects.filter(question__in=tags)
+        ags = tags.values('tag')
+        tags = tags.annotate(count_q=Count('question')).order_by('-count_q')[:10]
+        tags = Tag.objects.filter(pk__in=tags.values('tag'))
         return tags
+
+    # def popular_tags(self):
+    #     queryset = QuestionTag.objects.values('tag').annotate(count_q=Count('question')).order_by('-count_q')[:10]
+    #     tags = Tag.objects.filter(pk__in=[el['tag'] for el in queryset])
+    #     return tags
 
 
 class ProfileManager(models.Manager):
+    # def best_members(self):
+    #     # больше всего правильных ответов
+    #     queryset = Answer.objects.filter(status=True).values('user').annotate(count=Count('status')).order_by('-count')[:10]
+    #     user_ids = [qs['user'] for qs in queryset]
+    #     best_members = Profile.objects.filter(pk__in=user_ids).values('user_id')
+    #     nicknames = User.objects.filter(pk__in=best_members)
+    #     return nicknames
+
     def best_members(self):
-        # больше всего правильных ответов
-        queryset = Answer.objects.filter(status=True).values('user').annotate(count=Count('status')).order_by('-count')[:10]
-        user_ids = [qs['user'] for qs in queryset]
-        best_members = Profile.objects.filter(pk__in=user_ids).values('user_id')
-        nicknames = User.objects.filter(pk__in=best_members)
-        return nicknames
+        # 10 пользователей задавших самые популярные вопросы
+        items = LikeQuestion.manager.max_likes_on_questions(10).values('question')
+        items = Question.objects.filter(pk__in=items.values('question')).values('user')
+        nicknames = Profile.objects.filter(pk__in=items.values('user')).values('nickname')
+        return list(nicknames.values_list('nickname', flat=True))
+
 
 
 class LikeQuestionManager(models.Manager):

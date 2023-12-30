@@ -2,40 +2,44 @@
 {% load static %}
 {% block content %}
 
-<!--{% include 'components/question-component.html' %}-->
+{% include 'components/question-component.html' %}
 
-<!--<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">-->
-<!--{% csrf_token %}-->
-<!--{% for answer in answers %}-->
-<!--    {% include 'components/answer-component.html' %}-->
-<!--{% endfor %}-->
+<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
+{% csrf_token %}
+{% for answer in answers %}
 
-<!--{% include 'components/paginator-component.html' %}-->
+        {% include 'components/answer-component.html' %}
 
-<!--<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">-->
+{% endfor %}
+        <div class="new-answer">
+        </div>
 
-<!--<div class="create-answer">-->
-<!--    <form id="form" method="post">-->
-<!--        {% csrf_token %}-->
-<!--        <div class="input-check-error">-->
-<!--            <div class="error-message">-->
-<!--                {{ form.errors.content }}-->
-<!--            </div>-->
-<!--            <p>Answer</p>-->
-<!--            <br>-->
-<!--            {{ form.content }}-->
-<!--            <br>-->
-<!--        </div>-->
-<!--        <input class="submit-ask" type="submit" value="Answer!">-->
-<!--    </form>-->
-<!--</div>-->
+{% include 'components/paginator-component.html' %}
+
+<hr style="width: 90%; margin: 30px; color: black; border: 1px solid; opacity: 1;">
+
+<div class="create-answer">
+    <form id="form" method="post">
+        {% csrf_token %}
+        <div class="input-check-error">
+            <div class="error-message">
+                {{ form.errors.content }}
+            </div>
+            <p>Answer</p>
+            <br>
+                <textarea id="textareaID" class="form-content"></textarea>
+            <br>
+        </div>
+        <div class="comment">
+            <input class="submit-ask" data-user="{{ request.user.profile.pk }}" data-question="{{ question.0.pk }}" type="submit" value="Answer!">
+        </div>
+    </form>
+</div>
 
 
-<div id="counter">-</div>
-  <script src="https://unpkg.com/centrifuge@5.0.1/dist/centrifuge.js"></script>
-  <script type="text/javascript">
-    const container = document.getElementById('counter');
 
+<script src="https://unpkg.com/centrifuge@5.0.1/dist/centrifuge.js"></script>
+<script type="text/javascript">
     const centrifuge = new Centrifuge("{{ centrifugo.ws_url }}", {
       token: "{{ centrifugo.token }}"
     });
@@ -48,12 +52,10 @@
       console.log(`disconnected: ${ctx.code}, ${ctx.reason}`);
     }).connect();
 
-    const sub = centrifuge.newSubscription("channel");
+    const sub = centrifuge.newSubscription("{{ centrifugo.channel }}");
 
     sub.on('publication', function (ctx) {
       console.log(ctx);
-      container.innerHTML = ctx.data.value;
-      document.title = ctx.data.value;
     }).on('subscribing', function (ctx) {
       console.log(`subscribing: ${ctx.code}, ${ctx.reason}`);
     }).on('subscribed', function (ctx) {
@@ -61,7 +63,37 @@
     }).on('unsubscribed', function (ctx) {
       console.log(`unsubscribed: ${ctx.code}, ${ctx.reason}`);
     }).subscribe();
+
+
+    var button = document.getElementsByClassName('submit-ask')[0];
+    var new_answer = document.getElementsByClassName('new-answer')[0];
+
+    console.log(button);
+
+    var comment = document.getElementsByClassName('comment-answer')[0];
+
+    console.log(comment);
+
+    button.addEventListener('click', () => {
+        const formData = new FormData();
+        formData.append('user', button.dataset.user)
+        formData.append('question', button.dataset.question)
+        formData.append('content', document.getElementById("textareaID").value)
+
+        const request = new Request('/comment/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        });
+
+        fetch(request)
+        .then((response) => response.json())
+        .then((data) => {
+            new_answer.innerHTML = '<div class="question-element answer"><div class="person">{% if data.avatar_url %}<img src="{{ data.avatar_url }}" alt="Profile Avatar" class="avatar"/>{% else %}<img src={% static "img/avatar-answer.jpg" %} alt="" class="avatar">{% endif %}<div class="vote like-answer-section"><button><img src="{% static "img/up.svg" %}" alt=""></button><span>{{ data.likes_count }}</span><button><img src="{% static "img/down.svg" %}" alt=""></button></div></div><div class="question-text"><a href=""><h4></h4></a><p>{{ data.content }}</p><div class="correct-section"><input type="checkbox" id="incorrect" class="mycheckbox"><label for="incorrect">Correct!</label></div></div>'
+        });
+    })
   </script>
 
-
-{% endblock %}
+        {% endblock %}

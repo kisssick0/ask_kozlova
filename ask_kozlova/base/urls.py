@@ -20,4 +20,5 @@ urlpatterns = [
     path('like_answer/', views.like_answer, name='like_answer'),
     path('dislike_answer/', views.dislike_answer, name='dislike_answer'),
     path('correct/', views.correct, name='correct'),
+    path('comment/', views.comment, name='comment'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

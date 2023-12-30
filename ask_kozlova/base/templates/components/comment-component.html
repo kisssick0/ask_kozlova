@@ -1,0 +1,33 @@
+{% load static %}
+
+<div class="question-element answer" id="{{ answer.0.pk }}">
+    <div class="person">
+        {% if answer.0.user.avatar.url %}
+            <img src="{{ answer.0.user.avatar.url }}" alt="Profile Avatar" class="avatar"/>
+        {% else %}
+            <img src={% static "img/avatar-answer.jpg" %} alt="" class="avatar">
+        {% endif %}
+        <div class="vote like-answer-section">
+            <button data-id="{{ answer.0.pk }}"><img src="{% static "img/up.svg" %}" alt=""></button>
+            <span>{{ answer.1 }}</span>
+            <button data-id="{{ answer.0.pk }}"><img src="{% static "img/down.svg" %}" alt=""></button>
+        </div>
+    </div>
+    <div class="question-text">
+        <a href=""><h4>{{ answer.0.title }}</h4></a>
+        <p>{{ answer.0.content }}</p>
+        <div class="correct-section">
+            {% if answer.0.status is True %}
+                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="correct" class="mycheckbox-checked" checked>
+                <label for="correct">
+                    Correct!
+                </label>
+            {% else %}
+                <input data-question="{{ question.0.pk }}" data-answer="{{ answer.0.pk }}" type="checkbox" id="incorrect" class="mycheckbox">
+                <label for="incorrect">
+                    Correct!
+                </label>
+            {% endif %}
+        </div>
+    </div>
+</div>

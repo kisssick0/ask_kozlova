@@ -69,15 +69,11 @@ console.log(correctable_answers);
 for (let answer of correctable_answers) {
     const [button_correct,,] = answer.children;
 
-    console.log(button_correct);
-
     button_correct.addEventListener('click', () => {
         const formData = new FormData();
 
         formData.append('answer_id', button_correct.dataset.answer)
         formData.append('question_id', button_correct.dataset.question)
-
-        console.log(formData);
 
         const request = new Request('/correct/', {
             method: 'POST',

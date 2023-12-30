@@ -1,4 +1,8 @@
 import time
+import itertools
+import jwt
+import time
+from cent import Client
 
 from django.contrib import auth
 from django.contrib.auth import authenticate, login
@@ -8,13 +12,11 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from django.conf import settings as conf_settings
-
-import itertools
-import jwt
-import time
+from django.template.loader import render_to_string
 
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
 
 from .forms import LoginForm, RegisterForm, EditUserForm, EditProfileForm, QuestionForm, AnswerForm
 from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
@@ -22,15 +24,18 @@ from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
 
 QTY_ON_PAGE = 20
 
+client = Client(conf_settings.CENTRIFUGO_API_URL, api_key=conf_settings.CENTRIFUGO_API_KEY, timeout=1)
 
-def get_centrifugo_data(user_id: str) -> dict:
+
+def get_centrifugo_data(user_id: str, channel: str) -> dict:
     return {
         'centrifugo': {
             'token': jwt.encode({"sub": str(user_id),
                                  "exp": int(time.time()) + 5 * 60},
                                 conf_settings.CENTRIFUGO_TOKEN_HMAC_SECRET_KEY,
                                 algorithm="HS256"),
-            'ws_url': conf_settings.CENTRIFUGO_WS_URL
+            'ws_url': conf_settings.CENTRIFUGO_WS_URL,
+            'channel': channel
         }
     }
 
@@ -69,18 +74,13 @@ def question(request, question_id: int):
     answers = Answer.manager.answers_on_question(question_id)
     page_obj, page = paginate(request, answers)
 
-    if request.method == 'POST':
-        answer_form = AnswerForm(request.POST)
-        if answer_form.is_valid():
-            answer_form.instance.profile = request.user
-            answer_form.instance.question = Question.objects.get(pk=question_id)
-            answer = answer_form.save()
-            if answer:
-                return redirect('/question/' + str(question_id) + '/#' + str(answer))
-            else:
-                answer_form.add_error(None, 'Answer posting error')
-    else:
-        answer_form = AnswerForm()
+    answer_form = AnswerForm()
+
+    try:
+        answer_form.instance.user = request.user.profile
+        answer_form.instance.question = Question.objects.get(pk=question_id)
+    except:
+        pass
 
     return render(request, 'base/question.html',
                   {'question': item,
@@ -90,8 +90,30 @@ def question(request, question_id: int):
                    'popular_tags': Tag.manager.popular_tags(),
                    'best_members': Profile.manager.best_members(),
                    'form': answer_form,
-                   **get_centrifugo_data(request.user.id)
+                   **get_centrifugo_data(request.user.id, f'question.{question_id}')
                    })
+
+
+@csrf_protect
+@login_required
+def comment(request):
+
+    answer = Answer()
+    answer.user = get_object_or_404(Profile, pk=request.POST.get('user'))
+    print(answer.user)
+    answer.question = get_object_or_404(Question, pk=request.POST.get('question'))
+    answer.content = request.POST.get("content")
+    print(request.POST.get("content"))
+
+    answer.save()
+
+    client.publish(f'question.{request.POST.get("question")}', model_to_dict(answer))
+
+    return JsonResponse({
+        'avatar_url': answer.user.avatar.url,
+        'likes_count': 0,
+        'content': answer.content
+        })
 
 
 def tag(request, tag_name: str):

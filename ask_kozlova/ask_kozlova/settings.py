@@ -143,3 +143,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CENTRIFUGO_TOKEN_HMAC_SECRET_KEY = "my_secret"
 CENTRIFUGO_WS_URL = "ws://127.0.0.1:8010/connection/websocket"
+CENTRIFUGO_API_URL = "http://127.0.0.1:8010/api"
+CENTRIFUGO_API_KEY = "my_api_key"

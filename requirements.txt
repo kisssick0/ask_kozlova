@@ -4,3 +4,4 @@ Pillow==10.1.0
 gunicorn==21.2.0
 uwsgi==2.0.23
 pyjwt==2.8.0
+cent==4.1.0

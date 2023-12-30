@@ -97,13 +97,10 @@ def question(request, question_id: int):
 @csrf_protect
 @login_required
 def comment(request):
-
     answer = Answer()
     answer.user = get_object_or_404(Profile, pk=request.POST.get('user'))
-    print(answer.user)
     answer.question = get_object_or_404(Question, pk=request.POST.get('question'))
     answer.content = request.POST.get("content")
-    print(request.POST.get("content"))
 
     answer.save()
 

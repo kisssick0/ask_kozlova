@@ -3,6 +3,7 @@ import itertools
 import jwt
 import time
 from cent import Client
+from faker import Faker
 
 from django.contrib import auth
 from django.contrib.auth import authenticate, login
@@ -13,6 +14,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import model_to_dict
 from django.conf import settings as conf_settings
 from django.template.loader import render_to_string
+from django.core.cache import cache
 
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
@@ -22,9 +24,43 @@ from .forms import LoginForm, RegisterForm, EditUserForm, EditProfileForm, Quest
 from . models import Question, Answer, Tag, LikeQuestion, LikeAnswer, Profile
 
 
+fake = Faker()
+
 QTY_ON_PAGE = 20
 
 client = Client(conf_settings.CENTRIFUGO_API_URL, api_key=conf_settings.CENTRIFUGO_API_KEY, timeout=1)
+
+
+def cache_popular_tags():
+    tags = Tag.manager.popular_tags()
+    cache_key = 'popular_tags'
+    # tags = [{"tag_name": fake.unique.user_name()} for i in range(10)]
+    cache.set(cache_key, tags, 10)
+
+
+def get_popular_tags():
+    cache_key = 'popular_tags'
+    tags = cache.get(cache_key)
+
+    # if not tags:
+    #     cache_popular_tags()
+    return tags
+
+
+def cache_best_members():
+    best_members = Profile.manager.best_members()
+    cache_key = 'best_members'
+    # best_members = [fake.unique.user_name() for i in range(10)]
+    cache.set(cache_key, best_members, 10)
+
+
+def get_best_members():
+    cache_key = 'best_members'
+    best_members = cache.get(cache_key)
+
+    # if not best_members:
+    #     cache_best_members()
+    return best_members
 
 
 def get_centrifugo_data(user_id: str, channel: str) -> dict:
@@ -63,8 +99,8 @@ def index(request):
                   {'questions': page_obj,
                    'page_obj': page_obj,
                    'page': page,
-                   'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members()
                    })
 
 
@@ -87,8 +123,8 @@ def question(request, question_id: int):
                    'answers': page_obj,
                    'page_obj': page_obj,
                    'page': page,
-                   'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members(),
+                   'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members(),
                    'form': answer_form,
                    **get_centrifugo_data(request.user.id, f'question.{question_id}')
                    })
@@ -121,8 +157,8 @@ def tag(request, tag_name: str):
                    'page_obj': page_obj,
                    'page': page,
                    'tag': tag_name,
-                   'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members()
                    })
 
 
@@ -133,8 +169,8 @@ def hot(request):
                   {'questions': page_obj,
                    'page_obj': page_obj,
                    'page': page,
-                   'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members()
+                   'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members()
                    })
 
 
@@ -154,8 +190,8 @@ def log_in(request):
         login_form = LoginForm()
     return render(request,
                   'base/login.html',
-                  {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members(),
+                  {'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members(),
                    'form': login_form
                    })
 
@@ -178,8 +214,8 @@ def signup(request):
     else:
         user_form = RegisterForm()
     return render(request, 'base/signup.html',
-                  {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members(),
+                  {'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members(),
                    'form': user_form
                    })
 
@@ -199,8 +235,8 @@ def ask(request):
     else:
         question_form = QuestionForm()
     return render(request, 'base/ask.html',
-                  {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members(),
+                  {'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members(),
                    'form': question_form
                    })
 
@@ -227,8 +263,8 @@ def edit(request):
                 user_form.add_error(None, 'User saving error')
 
     return render(request, 'base/edit.html',
-                  {'popular_tags': Tag.manager.popular_tags(),
-                   'best_members': Profile.manager.best_members(),
+                  {'popular_tags': get_popular_tags(),
+                   'best_members': get_best_members(),
                    'user_form': user_form,
                    'profile_form': profile_form
                    })
